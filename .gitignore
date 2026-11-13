@@ -10,6 +10,12 @@ venv/
 env/
 ENV/
 
+# Frontend, Node & Mobile
+node_modules/
+dist/
+build/
+.expo/
+
 # Dynamic uploads, Grad-CAM heatmaps, and generated PDF reports
 static/uploads/*
 !static/uploads/.gitkeep
@@ -18,11 +24,13 @@ static/heatmaps/*
 reports/*
 !reports/.gitkeep
 
-# Large Histopathology Dataset Files (>2GB)
+# Large Histopathology Dataset & Archives (>2GB)
 dataset/raw/*
 !dataset/raw/.gitkeep
 dataset/splits/*
 !dataset/splits/.gitkeep
+*.zip
+*.tar.gz
 
 # Model weights binaries
 models/*.keras
@@ -32,6 +40,7 @@ models/*.h5
 # SQLite database files
 database/*.db
 *.sqlite3
+*.db
 
 # IDE & System Files
 .vscode/
@@ -39,4 +48,3 @@ database/*.db
 .DS_Store
 Thumbs.db
 *.log
-
