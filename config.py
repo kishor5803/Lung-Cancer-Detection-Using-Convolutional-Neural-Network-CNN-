@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
+IS_VERCEL = bool(os.environ.get("VERCEL"))
+STORAGE_DIR = Path("/tmp") if IS_VERCEL else BASE_DIR
 
 class Config:
     """Application configuration settings for LUNG-AI."""
@@ -9,10 +11,10 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "mca-lung-ai-secure-key-2026")
     
     # Storage Paths
-    DATABASE_PATH = BASE_DIR / "database" / "lung_ai.db"
-    UPLOAD_FOLDER = BASE_DIR / "static" / "uploads"
-    HEATMAP_FOLDER = BASE_DIR / "static" / "heatmaps"
-    REPORT_FOLDER = BASE_DIR / "reports"
+    DATABASE_PATH = (STORAGE_DIR / "lung_ai.db") if IS_VERCEL else (BASE_DIR / "database" / "lung_ai.db")
+    UPLOAD_FOLDER = (STORAGE_DIR / "uploads") if IS_VERCEL else (BASE_DIR / "static" / "uploads")
+    HEATMAP_FOLDER = (STORAGE_DIR / "heatmaps") if IS_VERCEL else (BASE_DIR / "static" / "heatmaps")
+    REPORT_FOLDER = (STORAGE_DIR / "reports") if IS_VERCEL else (BASE_DIR / "reports")
     MODEL_DIR = BASE_DIR / "models"
     DATASET_DIR = BASE_DIR / "dataset"
     

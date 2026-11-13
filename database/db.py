@@ -10,6 +10,8 @@ from config import Config
 
 def get_db_connection():
     """Returns a SQLite database connection with row dictionary mapping."""
+    if not Config.DATABASE_PATH.exists():
+        init_db()
     conn = sqlite3.connect(Config.DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn

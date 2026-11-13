@@ -151,6 +151,18 @@ def download_report(filename):
     return send_from_directory(Config.REPORT_FOLDER, filename, as_attachment=True)
 
 
+@app.route("/static/uploads/<path:filename>")
+def custom_static_uploads(filename):
+    """Serves uploaded slide images across local and serverless cloud environments."""
+    return send_from_directory(Config.UPLOAD_FOLDER, filename)
+
+
+@app.route("/static/heatmaps/<path:filename>")
+def custom_static_heatmaps(filename):
+    """Serves Grad-CAM heatmaps across local and serverless cloud environments."""
+    return send_from_directory(Config.HEATMAP_FOLDER, filename)
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """User and Administrator authentication."""
