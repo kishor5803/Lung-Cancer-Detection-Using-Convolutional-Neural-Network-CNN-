@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Dashboard | LUNG-AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="hero-header">
+    <span class="badge-tag" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Administrative Access</span>
+    <h1>LUNG-AI System Administration</h1>
+    <p>Real-time system telemetry, model performance metrics, dataset utilization, and user activity.</p>
+  </div>
+
+  <!-- Metric Summary Cards -->
+  <div class="metrics-row">
+    <div class="metric-box">
+      <span class="metric-label">Total Predictions Evaluated</span>
+      <span class="metric-val text-gold">{{ metrics.total_predictions }}</span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-label">Registered Accounts</span>
+      <span class="metric-val">{{ metrics.total_users }}</span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-label">Active Comparison Models</span>
+      <span class="metric-val">3 Architectures</span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-label">Explainability Engine</span>
+      <span class="metric-val text-success">Grad-CAM Online</span>
+    </div>
+  </div>
+
+  <!-- Subtype Distribution & Models -->
+  <div class="grid-layout" style="margin-top: 25px;">
+    <div class="glass-card">
+      <h3 class="card-title">Histopathology Classification Distribution</h3>
+      <p class="card-subtitle">Aggregate class frequencies from user evaluations.</p>
+
+      <div style="margin-top: 20px;">
+        {% for c_name, count in metrics.class_distribution.items() %}
+          <div class="prob-item">
+            <div class="prob-header">
+              <span>{{ c_name }}</span>
+              <strong>{{ count }} cases</strong>
+            </div>
+          </div>
+        {% else %}
+          <p style="color: #64748b; padding: 20px 0;">No predictions logged yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <h3 class="card-title">Model Registry Status</h3>
+      <p class="card-subtitle">Active deep learning models in the classification pipeline.</p>
+
+      <ul style="list-style: none; padding: 0; margin-top: 15px;">
+        {% for m in metrics.models %}
+          <li style="padding: 12px 0; border-bottom: 1px solid #223755; display: flex; justify-content: space-between;">
+            <div>
+              <strong>{{ m.model_name }} (v{{ m.version }})</strong>
+              <div style="font-size: 0.8rem; color: #8fa0b5;">Key: {{ m.model_key }}</div>
+            </div>
+            <span class="type-pill" style="align-self: center;">Ready</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Global Logs Table -->
+  <div class="glass-card" style="margin-top: 25px;">
+    <h3 class="card-title">Recent System Classification Log</h3>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Slide Sample</th>
+            <th>Predicted Subtype</th>
+            <th>Confidence</th>
+            <th>Model</th>
+            <th>PDF Report</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in predictions %}
+            <tr>
+              <td>{{ r.created_at }}</td>
+              <td><strong>{{ r.username or 'Anonymous' }}</strong></td>
+              <td>{{ r.filename }}</td>
+              <td>{{ r.predicted_class }}</td>
+              <td>{{ (r.confidence * 100)|round(2) }}%</td>
+              <td>{{ r.model_name }}</td>
+              <td>
+                {% if r.pdf_path %}
+                  <a href="{{ url_for('download_report', filename=r.pdf_path.split('/')[-1]) }}" class="btn-action">Download</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

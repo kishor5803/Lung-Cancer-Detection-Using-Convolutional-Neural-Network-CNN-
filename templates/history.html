@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History | LUNG-AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="hero-header">
+    <h1>Histopathology Prediction History</h1>
+    <p>Persistent log of all microscopic evaluations, model classifications, and downloadable diagnostic reports.</p>
+  </div>
+
+  <div class="glass-card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Slide Sample</th>
+            <th>Predicted Subtype</th>
+            <th>Confidence</th>
+            <th>Model Architecture</th>
+            <th>Visual Heatmap</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if records %}
+            {% for r in records %}
+              <tr>
+                <td>{{ r.created_at }}</td>
+                <td>
+                  <img src="{{ url_for('static', filename='uploads/' + r.filename) }}" alt="Thumbnail" class="table-thumb">
+                </td>
+                <td>
+                  <span class="status-pill {% if 'Malignant' in r.predicted_class or 'Adenocarcinoma' in r.predicted_class or 'Squamous' in r.predicted_class %}pill-danger{% else %}pill-success{% endif %}">
+                    {{ r.predicted_class }}
+                  </span>
+                </td>
+                <td><strong>{{ (r.confidence * 100)|round(2) }}%</strong></td>
+                <td>{{ r.model_name }}</td>
+                <td>
+                  {% if r.heatmap_path %}
+                    <a href="{{ url_for('static', filename=r.heatmap_path) }}" target="_blank" class="link-cam">View Heatmap ↗</a>
+                  {% else %}
+                    <span style="color: #64748b;">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if r.pdf_path %}
+                    <a href="{{ url_for('download_report', filename=r.pdf_path.split('/')[-1]) }}" class="btn-action">
+                      📄 PDF Report
+                    </a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 40px; color: #aab8cb;">
+                No classifications recorded yet. <a href="{{ url_for('index') }}" style="color: #d9b968;">Upload your first histopathology scan</a>.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

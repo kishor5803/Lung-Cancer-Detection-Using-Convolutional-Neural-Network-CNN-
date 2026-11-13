@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Model Comparison & Dashboard | LUNG-AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="hero-header">
+    <h1>Deep Learning Model Comparison Dashboard</h1>
+    <p>Comprehensive comparative evaluation of Custom CNN versus Transfer Learning architectures (MobileNetV2, EfficientNetB0) on the LC25000 benchmark.</p>
+  </div>
+
+  <!-- Comparison Table Card -->
+  <div class="glass-card">
+    <h2 class="card-title">Comparative Performance Metrics (Test Set)</h2>
+    <p class="card-subtitle">Macro-averaged classification metrics, computational latency, and memory footprint.</p>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Model Architecture</th>
+            <th>Type</th>
+            <th>Test Accuracy</th>
+            <th>Macro Precision</th>
+            <th>Macro Recall</th>
+            <th>Macro F1</th>
+            <th>Avg Latency</th>
+            <th>Parameters</th>
+            <th>Model Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for key, m in models.items() %}
+            <tr>
+              <td><strong>{{ m.name }}</strong></td>
+              <td><span class="type-pill">{{ m.type }}</span></td>
+              <td><span class="metric-highlight">{{ m.accuracy }}%</span></td>
+              <td>{{ m.macro_precision }}%</td>
+              <td>{{ m.macro_recall }}%</td>
+              <td>{{ m.macro_f1 }}%</td>
+              <td>{{ m.latency_ms }} ms</td>
+              <td>{{ "{:,}".format(m.params_count) }}</td>
+              <td>{{ m.size_mb }} MB</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Educational Insights -->
+  <div class="grid-layout" style="margin-top: 25px;">
+    <div class="glass-card">
+      <h3 class="card-title">🔬 Custom CNN Insights</h3>
+      <p style="color: #aab8cb; font-size: 0.9rem; line-height: 1.6;">
+        The baseline sequential CNN provides full transparency into the convolutional filtering process. While lightweight, it requires thorough regularization (Batch Normalization & Dropout) to prevent overfitting on augmented tissue tiles.
+      </p>
+    </div>
+
+    <div class="glass-card">
+      <h3 class="card-title">⚡ Transfer Learning Advantages</h3>
+      <p style="color: #aab8cb; font-size: 0.9rem; line-height: 1.6;">
+        Pre-trained weights from ImageNet (MobileNetV2 & EfficientNetB0) extract high-level visual representations—such as cell nuclei contours, glandular formations, and cytoplasm textures—allowing faster convergence and superior macro F1 scores.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

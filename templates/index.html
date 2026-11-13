@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnose Histopathology Scan | LUNG-AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="hero-header">
+    <h1>Explainable Lung Histopathology Classification</h1>
+    <p>Upload a biopsy microscopic image to generate deep learning predictions, class-wise confidence probabilities, and Grad-CAM visual heatmaps.</p>
+  </div>
+
+  <div class="grid-layout">
+    <!-- Upload Card -->
+    <div class="glass-card">
+      <h2 class="card-title">Upload Histopathology Scan</h2>
+      <p class="card-subtitle">Supported formats: JPEG, PNG, TIFF (LC25000: Benign, Adenocarcinoma, Squamous Cell)</p>
+
+      <form action="{{ url_for('classify') }}" method="POST" enctype="multipart/form-data" id="upload-form">
+        <div class="dropzone" id="dropzone">
+          <input type="file" name="file" id="file-input" accept="image/*" required style="display: none;">
+          <div class="dropzone-content" id="dropzone-prompt">
+            <div class="dropzone-icon">🔬</div>
+            <h3>Drag & Drop Histopathology Slide</h3>
+            <p>or click to browse files</p>
+          </div>
+          <div id="preview-container" style="display: none;">
+            <img id="image-preview" src="#" alt="Preview" class="preview-img">
+            <p id="preview-filename" class="preview-name"></p>
+            <span class="change-file-btn">Click to change image</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <label for="model_select"><strong>Select Neural Network Model:</strong></label>
+          <select name="model_key" id="model_select" class="form-control">
+            <option value="custom_cnn" selected>Custom 5-Layer CNN (Baseline Academic Architecture)</option>
+            <option value="mobilenetv2">MobileNetV2 (Transfer Learning - Lightweight)</option>
+            <option value="efficientnetb0">EfficientNetB0 (Transfer Learning - Compound Scaled)</option>
+          </select>
+        </div>
+
+        <div class="form-check" style="margin-top: 15px;">
+          <label class="checkbox-label">
+            <input type="checkbox" name="gradcam" value="1" checked>
+            Generate Grad-CAM Visual Heatmap Explanation
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn" style="margin-top: 25px; width: 100%;">
+          ⚡ Run Deep Learning Classification
+        </button>
+      </form>
+    </div>
+
+    <!-- Info & Benchmarks Side Card -->
+    <div class="glass-card side-info-card">
+      <h2 class="card-title">Dataset & Academic Framework</h2>
+      <p class="card-subtitle">LC25000 Lung Histopathology Dataset (15,000 Microscopic Tissues)</p>
+
+      <div class="category-list">
+        <div class="category-item">
+          <span class="category-badge badge-benign">lung_n</span>
+          <div>
+            <strong>Benign Lung Tissue</strong>
+            <p>Normal non-neoplastic alveolar parenchymal architecture.</p>
+          </div>
+        </div>
+        <div class="category-item">
+          <span class="category-badge badge-aca">lung_aca</span>
+          <div>
+            <strong>Lung Adenocarcinoma</strong>
+            <p>Glandular malignant neoplasm originating from bronchial epithelial cells.</p>
+          </div>
+        </div>
+        <div class="category-item">
+          <span class="category-badge badge-scc">lung_scc</span>
+          <div>
+            <strong>Lung Squamous Cell Carcinoma</strong>
+            <p>Keratinizing malignant tumor lining the larger pulmonary bronchial branches.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="innovation-callout">
+        <h4>💡 Explainable AI (XAI) with Grad-CAM</h4>
+        <p>Unlike black-box models, LUNG-AI computes gradients with respect to the final convolutional feature maps to highlight the microscopic morphological regions that steered the neural network's decision.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

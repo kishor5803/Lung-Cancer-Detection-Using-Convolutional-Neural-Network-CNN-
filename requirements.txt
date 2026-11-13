@@ -1,0 +1,12 @@
+tensorflow
+flask
+numpy
+pandas
+opencv-python
+scikit-learn
+matplotlib
+pillow
+reportlab
+pytest
+werkzeug
+

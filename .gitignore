@@ -1,0 +1,41 @@
+# Python & Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Dynamic uploads, Grad-CAM heatmaps, and generated PDF reports
+static/uploads/*
+!static/uploads/.gitkeep
+static/heatmaps/*
+!static/heatmaps/.gitkeep
+reports/*
+!reports/.gitkeep
+
+# Large Histopathology Dataset Files (>2GB)
+dataset/raw/*
+!dataset/raw/.gitkeep
+dataset/splits/*
+!dataset/splits/.gitkeep
+
+# Model weights binaries
+models/*.keras
+models/*.h5
+!models/model_metrics.json
+
+# SQLite database files
+database/*.db
+*.sqlite3
+
+# IDE & System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

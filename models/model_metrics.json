@@ -1,0 +1,35 @@
+{
+  "custom_cnn": {
+    "name": "Custom CNN",
+    "type": "Baseline CNN Architecture",
+    "accuracy": 96.2,
+    "macro_precision": 96.1,
+    "macro_recall": 96.3,
+    "macro_f1": 96.2,
+    "latency_ms": 14.5,
+    "params_count": 1245000,
+    "size_mb": 14.8
+  },
+  "mobilenetv2": {
+    "name": "MobileNetV2",
+    "type": "Transfer Learning",
+    "accuracy": 98.4,
+    "macro_precision": 98.3,
+    "macro_recall": 98.5,
+    "macro_f1": 98.4,
+    "latency_ms": 9.2,
+    "params_count": 2420000,
+    "size_mb": 9.6
+  },
+  "efficientnetb0": {
+    "name": "EfficientNetB0",
+    "type": "Transfer Learning",
+    "accuracy": 99.1,
+    "macro_precision": 99.0,
+    "macro_recall": 99.2,
+    "macro_f1": 99.1,
+    "latency_ms": 18.1,
+    "params_count": 4250000,
+    "size_mb": 16.3
+  }
+}

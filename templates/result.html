@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnostic Findings | LUNG-AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="result-top-bar">
+    <div>
+      <span class="badge-tag">Analysis Completed</span>
+      <h1 class="result-main-title">{{ prediction.predicted_class }}</h1>
+      <p class="result-sub-desc">{{ prediction.class_metadata.description }}</p>
+    </div>
+
+    <div class="action-buttons">
+      {% if pdf_url %}
+        <a href="{{ url_for('download_report', filename=pdf_url.split('/')[-1]) }}" class="btn-pdf">
+          📄 Download PDF Report
+        </a>
+      {% endif %}
+      <a href="{{ url_for('index') }}" class="btn-secondary">
+        🔄 New Scan
+      </a>
+    </div>
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div class="metrics-row">
+    <div class="metric-box">
+      <span class="metric-label">Model Confidence</span>
+      <span class="metric-val text-gold">{{ prediction.confidence_percentage }}%</span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-label">Classification Architecture</span>
+      <span class="metric-val">{{ prediction.model_name }}</span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-label">Risk Category</span>
+      <span class="metric-val {% if 'Malignant' in prediction.class_metadata.risk_level %}text-danger{% else %}text-success{% endif %}">
+        {{ prediction.class_metadata.risk_level }}
+      </span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-label">Inference Latency</span>
+      <span class="metric-val">{{ prediction.inference_latency_ms }} ms</span>
+    </div>
+  </div>
+
+  {% if prediction.uncertain %}
+  <div class="glass-card" style="margin-top: 20px; border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.08);">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 1.5rem;">⚠️</span>
+      <div>
+        <h4 style="margin: 0; color: #f59e0b; font-size: 1rem; font-weight: 600;">High Uncertainty Flagged (< 60.0% Confidence Threshold)</h4>
+        <p style="margin: 4px 0 0; color: #94a3b8; font-size: 0.85rem;">
+          The model's primary prediction score ({{ prediction.confidence_percentage }}%) is below the clinical confidence baseline. Histopathological secondary review by an expert pathologist is strongly recommended.
+        </p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Side-by-Side Visual Comparison & Grad-CAM -->
+  <div class="glass-card" style="margin-top: 25px;">
+    <h2 class="card-title">Explainable AI: Histopathology & Grad-CAM Heatmap</h2>
+    <p class="card-subtitle">Visualizing the spatial activations and morphological patterns that steered the neural network's prediction.</p>
+
+    <div class="images-comparison-grid">
+      <div class="image-card">
+        <h4>Original Microscopic Slide</h4>
+        <div class="img-wrapper">
+          <img src="{{ url_for('static', filename='uploads/' + original_filename) }}" alt="Original Biopsy">
+        </div>
+        <p class="image-caption">Native Hematoxylin & Eosin (H&E) Stain</p>
+      </div>
+
+      <div class="image-card">
+        <h4>Grad-CAM Saliency Overlay</h4>
+        <div class="img-wrapper">
+          {% if prediction.heatmap_url %}
+            <img src="{{ url_for('static', filename=prediction.heatmap_url) }}" alt="Grad-CAM Heatmap">
+          {% else %}
+            <div class="no-heatmap">Heatmap generation not requested</div>
+          {% endif %}
+        </div>
+        <p class="image-caption">Jet Colormap Highlighting Discriminative Features</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Probability Distribution Grid -->
+  <div class="glass-card" style="margin-top: 25px;">
+    <h2 class="card-title">Three-Class Softmax Probability Distribution</h2>
+    <p class="card-subtitle">Multi-class probability distribution computed by the final classification head.</p>
+
+    <div class="probabilities-container">
+      {% for class_name, prob in prediction.class_probabilities.items() %}
+        <div class="prob-item">
+          <div class="prob-header">
+            <span class="prob-name {% if class_name == prediction.predicted_class %}text-gold font-bold{% endif %}">
+              {% if class_name == prediction.predicted_class %}★ {% endif %}{{ class_name }}
+            </span>
+            <span class="prob-value">
+              {{ (prob * 100)|round(2) }}% ({{ prob }})
+            </span>
+          </div>
+          <div class="prob-track">
+            <div class="prob-fill {% if class_name == prediction.predicted_class %}gold-fill{% endif %}" style="width: {{ prob * 100 }}%;"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="notice-box">
+      <strong>Academic & Educational Notice:</strong>
+      <p>{{ prediction.disclaimer }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
