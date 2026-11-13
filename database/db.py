@@ -20,7 +20,8 @@ def init_db():
     """Initializes SQLite database schemas and default administrator."""
     Config.DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
     
-    conn = get_db_connection()
+    conn = sqlite3.connect(Config.DATABASE_PATH)
+    conn.row_factory = sqlite3.Row
     schema_path = Path(__file__).parent / "schema.sql"
     
     with open(schema_path, "r", encoding="utf-8") as f:
