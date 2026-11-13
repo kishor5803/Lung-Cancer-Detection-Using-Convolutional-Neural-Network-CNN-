@@ -215,8 +215,9 @@ def admin_dashboard():
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
     print("\n" + "=" * 50)
     print(" 🫁 LUNG-AI Flask Application Running")
-    print(" URL: http://127.0.0.1:5000")
+    print(f" URL: http://0.0.0.0:{port}")
     print("=" * 50 + "\n")
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False)
