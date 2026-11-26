@@ -115,6 +115,86 @@
       <p>{{ prediction.disclaimer }}</p>
     </div>
   </div>
+
+  <!-- Clinical Cancer Staging Assessment & Educational Bridge -->
+  <div class="glass-card staging-context-card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+      <div>
+        <span class="stage-hero-badge">Clinical Oncology Pathway</span>
+        <h2 class="card-title" style="margin-top: 4px;">
+          From Histopathology to Clinical Cancer Staging (0–IV)
+        </h2>
+        <p class="card-subtitle">
+          How this AI cellular classification aligns with clinical tumor, node, and metastasis (TNM) staging protocols.
+        </p>
+      </div>
+
+      <a href="{{ url_for('stages') }}" class="btn-primary" style="padding: 10px 18px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+        <span>Stage Explorer (0–IV)</span>
+        <span>➔</span>
+      </a>
+    </div>
+
+    {% if 'Adenocarcinoma' in prediction.predicted_class or 'Squamous' in prediction.predicted_class %}
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin: 18px 0;">
+        <h4 style="color: var(--primary-gold); font-size: 0.95rem; margin-bottom: 6px;">
+          🔬 Malignant Epithelial Neoplasm Identified: {{ prediction.predicted_class }}
+        </h4>
+        <p style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.6;">
+          Our deep learning model analyzed the microscopic H&E slide tile and identified histological features of <strong>{{ prediction.predicted_class }}</strong> (Non-Small Cell Lung Cancer). 
+          Under standard oncology guidelines (NCCN / AJCC), histological diagnosis is the <em>first prerequisite step</em>. The patient’s clinical stage (0–IV) must now be established through multi-modal radiology (Contrast Chest CT, 18F-FDG PET-CT, and Brain MRI) to determine whether the disease is localized (Stage I), regionally invasive (Stage II–III), or metastatic (Stage IV).
+        </p>
+      </div>
+
+      <!-- Quick 5-Stage Pathway Chips -->
+      <div class="staging-pipeline-grid">
+        <a href="{{ url_for('stages') }}#stage-0" class="staging-pipeline-step">
+          <span class="step-badge" style="color: #38bdf8;">Stage 0</span>
+          <span class="step-label">In Situ</span>
+          <span class="step-summary">Airway mucosa only</span>
+        </a>
+        <a href="{{ url_for('stages') }}#stage-1" class="staging-pipeline-step">
+          <span class="step-badge" style="color: #10b981;">Stage I</span>
+          <span class="step-label">Localized</span>
+          <span class="step-summary">Isolated tumor ≤4cm</span>
+        </a>
+        <a href="{{ url_for('stages') }}#stage-2" class="staging-pipeline-step">
+          <span class="step-badge" style="color: #f59e0b;">Stage II</span>
+          <span class="step-label">Regional</span>
+          <span class="step-summary">Hilar nodes / >4cm</span>
+        </a>
+        <a href="{{ url_for('stages') }}#stage-3" class="staging-pipeline-step">
+          <span class="step-badge" style="color: #f97316;">Stage III</span>
+          <span class="step-label">Locally Adv.</span>
+          <span class="step-summary">Mediastinal nodes</span>
+        </a>
+        <a href="{{ url_for('stages') }}#stage-4" class="staging-pipeline-step">
+          <span class="step-badge" style="color: #ef4444;">Stage IV</span>
+          <span class="step-label">Metastatic</span>
+          <span class="step-summary">Distant organ spread</span>
+        </a>
+      </div>
+
+    {% else %}
+      <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 16px; margin: 18px 0;">
+        <h4 style="color: #34d399; font-size: 0.95rem; margin-bottom: 6px;">
+          ✓ Non-Neoplastic Tissue: Staging Not Applicable
+        </h4>
+        <p style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.6;">
+          The microscopic sample exhibits architecture consistent with <strong>Benign Lung Tissue</strong> (healthy non-malignant pulmonary parenchyma). 
+          Clinical cancer staging (Stage 0–IV) applies strictly to malignant neoplasms. No staging or oncological intervention pathway is indicated for benign histology.
+        </p>
+      </div>
+    {% endif %}
+
+    <!-- Explicit Academic Staging Disclaimer -->
+    <div style="display: flex; gap: 10px; align-items: center; background: rgba(8, 20, 38, 0.5); padding: 10px 14px; border-radius: 6px; border: 1px dashed var(--border-color);">
+      <span style="font-size: 1.2rem;">⚠️</span>
+      <p style="font-size: 0.8rem; color: #94a3b8; margin: 0; line-height: 1.4;">
+        <strong>Crucial Academic & Clinical Clarification:</strong> This AI system classifies microscopic histopathological tissue subtypes from biopsy slides. It does <em>not</em> diagnose clinical cancer stages (0–IV). Clinical staging requires full-body radiographic imaging (CT/PET) and TNM evaluation by a licensed oncology tumor board.
+      </p>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

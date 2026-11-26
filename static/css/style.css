@@ -605,3 +605,526 @@ body {
   color: var(--text-dim);
 }
 
+/* ==========================================================================
+   Lung Cancer Stages (0–IV) Explorer Styles
+   ========================================================================== */
+
+.stage-hero-badge {
+  display: inline-block;
+  background: rgba(217, 185, 104, 0.12);
+  color: var(--primary-gold);
+  border: 1px solid rgba(217, 185, 104, 0.3);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+.stage-nav-bar {
+  margin-bottom: 25px;
+  position: sticky;
+  top: 70px;
+  z-index: 40;
+  background: rgba(8, 20, 38, 0.92);
+  backdrop-filter: blur(12px);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(34, 55, 85, 0.6);
+}
+
+.stage-pills-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.stage-pill-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.stage-pill-link:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--primary-gold);
+  transform: translateY(-1px);
+}
+
+.stage-pill-link .pill-number {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.stage-pill-link.tnm-link {
+  margin-left: auto;
+  border-color: rgba(217, 185, 104, 0.4);
+  background: rgba(217, 185, 104, 0.08);
+  color: var(--primary-gold);
+}
+
+/* Distinction Callout */
+.distinction-banner {
+  margin-bottom: 30px;
+  border-left: 4px solid var(--primary-gold);
+  background: linear-gradient(90deg, rgba(217, 185, 104, 0.08) 0%, rgba(16, 33, 56, 0.6) 100%);
+}
+
+.distinction-content {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.distinction-icon {
+  font-size: 1.8rem;
+  background: rgba(217, 185, 104, 0.15);
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+.distinction-content h3 {
+  font-size: 1.05rem;
+  color: var(--primary-gold);
+  margin-bottom: 6px;
+}
+
+.distinction-content p {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Stage Cards Stream */
+.stages-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.stage-card {
+  scroll-margin-top: 130px;
+  border: 1px solid var(--border-color);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stage-card:hover {
+  border-color: rgba(217, 185, 104, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.stage-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.stage-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stage-badge-large {
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+.stage-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.stage-oneliner {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.survival-pill {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.survival-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.survival-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+/* Stage Body Layout */
+.stage-body-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 25px;
+  align-items: start;
+}
+
+.stage-illustration-box {
+  background: #081728;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.illustration-wrapper {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.stage-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.illustration-caption {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Details Box */
+.stage-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tnm-box {
+  background: rgba(11, 25, 44, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+.tnm-title {
+  font-size: 0.85rem;
+  color: var(--primary-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.tnm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.tnm-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tnm-tag {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.tnm-val {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+/* Characteristics Row */
+.clinical-desc-box h4,
+.symptoms-box h4,
+.treatment-box h4 {
+  font-size: 0.92rem;
+  color: #e2e8f0;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.clinical-desc-box p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.char-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px dashed var(--border-color);
+}
+
+.char-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.char-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.char-val {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* Symptoms List */
+.symptoms-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+
+.symptoms-list li {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.symptoms-list .bullet {
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+/* Treatment Tags */
+.treatment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.treatment-pill {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid var(--border-color);
+  color: #e2e8f0;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.takeaway-callout {
+  background: rgba(15, 23, 42, 0.6);
+  border-left: 3px solid var(--primary-gold);
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+/* Table Specific Badges */
+.stage-table-badge {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  display: inline-block;
+}
+
+.code-pill {
+  background: #0f172a;
+  color: #38bdf8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  border: 1px solid #1e293b;
+}
+
+.goal-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.goal-curative { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.goal-multimodal { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.goal-locoregional { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+.goal-systemic { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+/* Pathway Step Cards */
+.pathway-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.pathway-step-card {
+  background: rgba(11, 25, 44, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s;
+}
+
+.pathway-step-card:hover {
+  transform: translateY(-2px);
+}
+
+.pathway-step-card.active-step {
+  border-color: var(--primary-gold);
+  background: linear-gradient(180deg, rgba(217, 185, 104, 0.12) 0%, rgba(11, 25, 44, 0.8) 100%);
+}
+
+.pathway-step-card .step-num {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--primary-gold);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.pathway-step-card h4 {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.pathway-step-card p {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* Result Page Staging Section */
+.staging-context-card {
+  margin-top: 25px;
+  border-top: 3px solid var(--primary-gold);
+}
+
+.staging-pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.staging-pipeline-step {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.staging-pipeline-step:hover {
+  background: rgba(217, 185, 104, 0.1);
+  border-color: var(--primary-gold);
+  transform: translateY(-2px);
+}
+
+.staging-pipeline-step .step-badge {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.staging-pipeline-step .step-label {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.staging-pipeline-step .step-summary {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  line-height: 1.3;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .stage-body-grid {
+    grid-template-columns: 1fr;
+  }
+  .pathway-cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .staging-pipeline-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .symptoms-list {
+    grid-template-columns: 1fr;
+  }
+  .char-metrics-row,
+  .tnm-grid {
+    grid-template-columns: 1fr;
+  }
+  .pathway-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .staging-pipeline-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+

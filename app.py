@@ -15,6 +15,7 @@ from services.history_service import (
     get_all_predictions, get_dashboard_metrics
 )
 from services.report_service import generate_pdf_report
+from services.stages_service import get_all_stages, get_stage_by_id
 from prediction.predict import predict_single_image
 from training.compare_models import generate_benchmark_metrics
 
@@ -131,6 +132,23 @@ def dashboard():
         models_data = generate_benchmark_metrics()
 
     return render_template("dashboard.html", models=models_data)
+
+
+@app.route("/stages")
+def stages():
+    """Lung Cancer Stage Explorer (Stage 0 to Stage IV) based on AJCC/UICC TNM classification."""
+    all_stages = get_all_stages()
+    return render_template("stages.html", stages=all_stages)
+
+
+@app.route("/stages/<stage_id>")
+def stage_detail(stage_id):
+    """Direct deep link to a specific stage."""
+    stage = get_stage_by_id(stage_id)
+    if not stage:
+        flash(f"Stage '{stage_id}' not found.", "warning")
+        return redirect(url_for("stages"))
+    return render_template("stages.html", stages=get_all_stages(), active_stage=stage_id)
 
 
 @app.route("/history")

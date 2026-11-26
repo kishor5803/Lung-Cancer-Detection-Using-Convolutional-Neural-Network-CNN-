@@ -1,0 +1,433 @@
+{% extends "base.html" %}
+
+{% block title %}Lung Cancer Stage Explorer (Stage 0–IV) | LUNG-AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <!-- Hero Section -->
+  <div class="hero-header">
+    <div class="stage-hero-badge">Clinical Oncology & Pathological Staging</div>
+    <h1>Lung Cancer Stage Explorer (Stage 0–IV)</h1>
+    <p>Comprehensive interactive guide to the AJCC / UICC TNM Staging System for Non-Small Cell Lung Cancer (NSCLC). Understand tumor progression, anatomical invasion, clinical symptoms, and treatment pathways from Carcinoma in Situ to Metastatic dissemination.</p>
+  </div>
+
+  <!-- Stage Navigation Pills -->
+  <div class="stage-nav-bar">
+    <div class="stage-pills-container">
+      {% for s in stages %}
+        <a href="#{{ s.id }}" class="stage-pill-link" data-stage="{{ s.id }}">
+          <span class="pill-number" style="background: {{ s.badge_color }}22; color: {{ s.badge_color }}; border-color: {{ s.badge_color }};">
+            Stage {{ s.stage_roman }}
+          </span>
+          <span class="pill-title">{{ s.subtitle.split('(')[0] }}</span>
+        </a>
+      {% endfor %}
+      <a href="#tnm-matrix" class="stage-pill-link tnm-link">
+        <span class="pill-number">📊</span>
+        <span class="pill-title">TNM Comparison Matrix</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Core Academic Distinction Banner -->
+  <div class="glass-card distinction-banner">
+    <div class="distinction-content">
+      <div class="distinction-icon">🔬 ➔ 🩺</div>
+      <div>
+        <h3>Histopathological Subtyping vs. Clinical Cancer Staging</h3>
+        <p>
+          <strong>LUNG-AI's CNN Model</strong> evaluates microscopic cellular architecture (H&E stain) to classify the <em>tissue subtype</em>: 
+          <strong>Benign Lung Tissue</strong>, <strong>Lung Adenocarcinoma</strong>, or <strong>Lung Squamous Cell Carcinoma</strong>. 
+          Once malignancy is confirmed microscopically, oncologists utilize anatomical radiographic imaging (CT, PET-CT, MRI) and lymph node biopsies to determine the 
+          <strong>Clinical Cancer Stage (0–IV)</strong> to guide surgical resectability, chemoradiation, and systemic targeted therapy.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stages Cards Stream -->
+  <div class="stages-stream">
+    {% for s in stages %}
+      <div class="glass-card stage-card" id="{{ s.id }}">
+        <div class="stage-card-header">
+          <div class="stage-title-group">
+            <span class="stage-badge-large" style="background: {{ s.badge_color }}1a; color: {{ s.badge_color }}; border: 1px solid {{ s.badge_color }}44;">
+              Stage {{ s.stage_roman }}
+            </span>
+            <div>
+              <h2 class="stage-name">{{ s.name }} – {{ s.subtitle }}</h2>
+              <p class="stage-oneliner">"{{ s.one_liner }}"</p>
+            </div>
+          </div>
+          <div class="survival-pill" title="5-Year Relative Survival Rate">
+            <span class="survival-label">5-Yr Relative Survival</span>
+            <span class="survival-value" style="color: {{ s.badge_color }};">{{ s.prognosis_5yr }}</span>
+          </div>
+        </div>
+
+        <div class="stage-body-grid">
+          <!-- Left: Medical Illustration -->
+          <div class="stage-illustration-box">
+            <div class="illustration-wrapper">
+              {% if s.id == 'stage-0' %}
+                <!-- SVG: Stage 0 (Carcinoma in Situ - Airway Lining) -->
+                <svg viewBox="0 0 400 300" class="stage-svg" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="grad-airway" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#0f2b48" />
+                      <stop offset="100%" stop-color="#091829" />
+                    </linearGradient>
+                    <radialGradient id="grad-cell-0" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#38bdf8" />
+                      <stop offset="100%" stop-color="#0284c7" />
+                    </radialGradient>
+                  </defs>
+                  <!-- Background Canvas -->
+                  <rect width="400" height="300" rx="12" fill="url(#grad-airway)" />
+                  <!-- Airway Lumen (Top) -->
+                  <rect x="20" y="20" width="360" height="70" rx="6" fill="#143152" stroke="#2a4d74" stroke-dasharray="4" />
+                  <text x="200" y="55" fill="#94a3b8" font-size="12" font-family="sans-serif" text-anchor="middle" font-weight="600">BRONCHIAL AIRWAY LUMEN (BREATHING PASSAGE)</text>
+                  
+                  <!-- Epithelial Cell Layer (Abnormal Cells strictly confined) -->
+                  <rect x="20" y="100" width="360" height="45" fill="#1e3a5f" />
+                  <!-- Normal & In-Situ Cells -->
+                  <circle cx="50" cy="122" r="12" fill="#2d527c" stroke="#486581" />
+                  <circle cx="80" cy="122" r="12" fill="#2d527c" stroke="#486581" />
+                  <circle cx="110" cy="122" r="12" fill="#2d527c" stroke="#486581" />
+                  
+                  <!-- Dysplastic / Carcinoma in situ cells (Highlighted) -->
+                  <g filter="drop-shadow(0 0 6px #38bdf8)">
+                    <circle cx="150" cy="122" r="13" fill="url(#grad-cell-0)" stroke="#7dd3fc" stroke-width="2" />
+                    <circle cx="180" cy="122" r="14" fill="url(#grad-cell-0)" stroke="#7dd3fc" stroke-width="2" />
+                    <circle cx="210" cy="122" r="13" fill="url(#grad-cell-0)" stroke="#7dd3fc" stroke-width="2" />
+                    <circle cx="240" cy="122" r="14" fill="url(#grad-cell-0)" stroke="#7dd3fc" stroke-width="2" />
+                    <circle cx="270" cy="122" r="13" fill="url(#grad-cell-0)" stroke="#7dd3fc" stroke-width="2" />
+                  </g>
+                  
+                  <circle cx="310" cy="122" r="12" fill="#2d527c" stroke="#486581" />
+                  <circle cx="345" cy="122" r="12" fill="#2d527c" stroke="#486581" />
+
+                  <!-- Basement Membrane (CRITICAL: INTACT) -->
+                  <line x1="20" y1="148" x2="380" y2="148" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6,4" />
+                  <text x="200" y="165" fill="#38bdf8" font-size="11" font-family="sans-serif" text-anchor="middle" font-weight="700">✓ BASEMENT MEMBRANE IS INTACT (NO PENETRATION)</text>
+
+                  <!-- Deep Submucosa & Cartilage (Clean / Unaffected) -->
+                  <rect x="20" y="175" width="360" height="90" rx="4" fill="#0d1f33" stroke="#1d3550" />
+                  <text x="200" y="210" fill="#64748b" font-size="11" font-family="sans-serif" text-anchor="middle">SUBMUCOSA & BRONCHIAL PARENCHYMA</text>
+                  <text x="200" y="235" fill="#10b981" font-size="12" font-family="sans-serif" text-anchor="middle" font-weight="700">✓ Zero invasion into deep tissue or lymphatics</text>
+                  
+                  <!-- Pointer Callout -->
+                  <path d="M 210,100 L 210,75" stroke="#7dd3fc" stroke-width="1.5" marker-end="url(#arrow)" />
+                  <rect x="135" y="72" width="150" height="20" rx="4" fill="#0369a1" />
+                  <text x="210" y="86" fill="#f8fafc" font-size="10" font-family="sans-serif" text-anchor="middle" font-weight="600">Carcinoma in Situ (Tis)</text>
+                </svg>
+
+              {% elif s.id == 'stage-1' %}
+                <!-- SVG: Stage I (Localized Primary Nodule) -->
+                <svg viewBox="0 0 400 300" class="stage-svg" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="400" height="300" rx="12" fill="#081728" />
+                  <!-- Trachea and Bronchial Tree -->
+                  <path d="M 200,30 L 200,90 Q 200,105 170,120 L 120,150" stroke="#486581" stroke-width="8" fill="none" stroke-linecap="round" />
+                  <path d="M 200,90 Q 200,105 230,120 L 280,150" stroke="#486581" stroke-width="8" fill="none" stroke-linecap="round" />
+                  
+                  <!-- Left & Right Lung Silhouette -->
+                  <!-- Right Lung (Anatomical Left) -->
+                  <path d="M 100,80 C 130,70 170,100 160,180 C 150,240 80,260 70,220 C 60,180 70,90 100,80 Z" fill="#10253f" stroke="#234267" stroke-width="2" />
+                  <!-- Left Lung (Anatomical Right with Cardiac Notch) -->
+                  <path d="M 300,80 C 270,70 230,100 240,180 C 245,210 270,245 320,240 C 340,210 330,90 300,80 Z" fill="#10253f" stroke="#234267" stroke-width="2" />
+
+                  <!-- Isolated Solitary Nodule (Stage I: <=4cm, Upper Lobe) -->
+                  <circle cx="115" cy="120" r="16" fill="#10b981" stroke="#6ee7b7" stroke-width="3" filter="drop-shadow(0 0 8px #10b981)" />
+                  <circle cx="115" cy="120" r="6" fill="#064e3b" />
+                  
+                  <!-- Clear Regional Lymph Nodes (Hilar & Mediastinal) -->
+                  <circle cx="170" cy="125" r="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5" />
+                  <circle cx="230" cy="125" r="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5" />
+                  <circle cx="200" cy="110" r="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5" />
+                  <circle cx="200" cy="80" r="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5" />
+
+                  <!-- Status Indicators -->
+                  <rect x="25" y="235" width="350" height="45" rx="6" fill="#0d233a" stroke="#1d4064" />
+                  <text x="50" y="255" fill="#10b981" font-size="12" font-weight="700">● Solitary Primary Tumor (T1/T2a)</text>
+                  <text x="50" y="271" fill="#94a3b8" font-size="11">● Lymph Nodes Clear (N0) | Zero Distant Metastasis (M0)</text>
+                  
+                  <!-- Tag -->
+                  <rect x="65" y="45" width="110" height="24" rx="4" fill="#064e3b" stroke="#10b981" />
+                  <text x="120" y="61" fill="#a7f3d0" font-size="11" text-anchor="middle" font-weight="700">Tumor ≤ 4cm</text>
+                  <line x1="115" y1="70" x2="115" y2="100" stroke="#10b981" stroke-width="1.5" />
+                </svg>
+
+              {% elif s.id == 'stage-2' %}
+                <!-- SVG: Stage II (Limited Regional Spread) -->
+                <svg viewBox="0 0 400 300" class="stage-svg" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="400" height="300" rx="12" fill="#081728" />
+                  <!-- Trachea and Bronchial Tree -->
+                  <path d="M 200,30 L 200,90 Q 200,105 170,120 L 120,150" stroke="#486581" stroke-width="8" fill="none" stroke-linecap="round" />
+                  <path d="M 200,90 Q 200,105 230,120 L 280,150" stroke="#486581" stroke-width="8" fill="none" stroke-linecap="round" />
+                  
+                  <!-- Lung Outlines -->
+                  <path d="M 100,80 C 130,70 170,100 160,180 C 150,240 80,260 70,220 C 60,180 70,90 100,80 Z" fill="#10253f" stroke="#234267" stroke-width="2" />
+                  <path d="M 300,80 C 270,70 230,100 240,180 C 245,210 270,245 320,240 C 340,210 330,90 300,80 Z" fill="#10253f" stroke="#234267" stroke-width="2" />
+
+                  <!-- Larger Primary Tumor (Stage II) -->
+                  <circle cx="110" cy="140" r="24" fill="#f59e0b" stroke="#fcd34d" stroke-width="3" filter="drop-shadow(0 0 10px #f59e0b)" />
+                  <circle cx="110" cy="140" r="10" fill="#78350f" />
+                  
+                  <!-- Involved Ipsilateral Hilar Lymph Node (N1 - Amber alert) -->
+                  <line x1="130" y1="135" x2="165" y2="128" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3" />
+                  <circle cx="168" cy="126" r="9" fill="#f59e0b" stroke="#fef3c7" stroke-width="2" filter="drop-shadow(0 0 8px #f59e0b)" />
+                  
+                  <!-- Clear Mediastinal Nodes (N2/N3 remain clear) -->
+                  <circle cx="200" cy="110" r="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5" />
+                  <circle cx="200" cy="80" r="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5" />
+                  <circle cx="230" cy="125" r="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5" />
+
+                  <!-- Status Indicators -->
+                  <rect x="25" y="235" width="350" height="45" rx="6" fill="#0d233a" stroke="#1d4064" />
+                  <text x="50" y="255" fill="#f59e0b" font-size="12" font-weight="700">▲ Larger Primary Tumor (T2/T3) or N1 Node Involvement</text>
+                  <text x="50" y="271" fill="#94a3b8" font-size="11">● Spread limited to ipsilateral hilar/peribronchial nodes</text>
+                  
+                  <!-- Callout -->
+                  <rect x="150" y="45" width="170" height="24" rx="4" fill="#78350f" stroke="#f59e0b" />
+                  <text x="235" y="61" fill="#fef3c7" font-size="11" text-anchor="middle" font-weight="700">Ipsilateral Hilar Nodes (N1)</text>
+                  <line x1="200" y1="70" x2="175" y2="118" stroke="#f59e0b" stroke-width="1.5" />
+                </svg>
+
+              {% elif s.id == 'stage-3' %}
+                <!-- SVG: Stage III (Locally Advanced / Mediastinal Spread) -->
+                <svg viewBox="0 0 400 300" class="stage-svg" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="400" height="300" rx="12" fill="#081728" />
+                  <!-- Trachea and Bronchial Tree -->
+                  <path d="M 200,30 L 200,90 Q 200,105 170,120 L 120,150" stroke="#486581" stroke-width="8" fill="none" stroke-linecap="round" />
+                  <path d="M 200,90 Q 200,105 230,120 L 280,150" stroke="#486581" stroke-width="8" fill="none" stroke-linecap="round" />
+                  
+                  <!-- Lung Outlines -->
+                  <path d="M 100,80 C 130,70 170,100 160,180 C 150,240 80,260 70,220 C 60,180 70,90 100,80 Z" fill="#10253f" stroke="#234267" stroke-width="2" />
+                  <path d="M 300,80 C 270,70 230,100 240,180 C 245,210 270,245 320,240 C 340,210 330,90 300,80 Z" fill="#10253f" stroke="#234267" stroke-width="2" />
+
+                  <!-- Large Primary Mass with Chest Infiltration -->
+                  <path d="M 85,120 Q 130,110 140,150 Q 120,185 80,170 Q 60,140 85,120 Z" fill="#f97316" stroke="#fed7aa" stroke-width="3" filter="drop-shadow(0 0 12px #f97316)" />
+                  
+                  <!-- Extensive Mediastinal & Subcarinal Lymph Node Spread (N2/N3) -->
+                  <circle cx="168" cy="126" r="10" fill="#ea580c" stroke="#fed7aa" stroke-width="2" filter="drop-shadow(0 0 6px #f97316)" />
+                  <circle cx="200" cy="115" r="12" fill="#ea580c" stroke="#fed7aa" stroke-width="2" filter="drop-shadow(0 0 8px #f97316)" />
+                  <circle cx="200" cy="75" r="10" fill="#ea580c" stroke="#fed7aa" stroke-width="2" filter="drop-shadow(0 0 6px #f97316)" />
+                  <circle cx="230" cy="125" r="9" fill="#ea580c" stroke="#fed7aa" stroke-width="2" />
+
+                  <!-- Spreading Stream Lines -->
+                  <line x1="130" y1="140" x2="190" y2="118" stroke="#f97316" stroke-width="2.5" stroke-dasharray="4,2" />
+                  <line x1="200" y1="105" x2="200" y2="85" stroke="#f97316" stroke-width="2.5" stroke-dasharray="4,2" />
+
+                  <!-- Status Indicators -->
+                  <rect x="25" y="235" width="350" height="45" rx="6" fill="#0d233a" stroke="#1d4064" />
+                  <text x="50" y="255" fill="#f97316" font-size="12" font-weight="700">⚠ Extensive Mediastinal & Central Spread (N2 / N3)</text>
+                  <text x="50" y="271" fill="#94a3b8" font-size="11">● Localized in chest, but extensively infiltrates lymph stations</text>
+                  
+                  <!-- Callout -->
+                  <rect x="180" y="30" width="180" height="24" rx="4" fill="#7c2d12" stroke="#f97316" />
+                  <text x="270" y="46" fill="#fed7aa" font-size="10.5" text-anchor="middle" font-weight="700">Subcarinal & Mediastinal (N2/N3)</text>
+                </svg>
+
+              {% elif s.id == 'stage-4' %}
+                <!-- SVG: Stage IV (Metastatic Dissemination) -->
+                <svg viewBox="0 0 400 300" class="stage-svg" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="400" height="300" rx="12" fill="#081728" />
+                  <!-- Human Body Schematic -->
+                  <!-- Head -->
+                  <circle cx="200" cy="40" r="22" fill="#132742" stroke="#2a4e76" stroke-width="2" />
+                  <!-- Neck & Torso -->
+                  <path d="M 190,62 L 190,75 L 140,90 L 130,220 L 270,220 L 260,90 L 210,75 L 210,62 Z" fill="#0f223a" stroke="#224265" stroke-width="2" />
+
+                  <!-- Primary Lung Tumor (Right Thorax) -->
+                  <circle cx="165" cy="120" r="18" fill="#ef4444" stroke="#fecaca" stroke-width="2" filter="drop-shadow(0 0 10px #ef4444)" />
+                  <text x="165" y="124" fill="#fff" font-size="8" font-weight="800" text-anchor="middle">PRIMARY</text>
+
+                  <!-- Metastatic Site 1: Brain -->
+                  <circle cx="200" cy="38" r="9" fill="#dc2626" stroke="#fee2e2" stroke-width="2" filter="drop-shadow(0 0 8px #ef4444)" />
+                  <path d="M 170,105 Q 185,70 195,48" stroke="#ef4444" stroke-width="2" stroke-dasharray="3,2" />
+                  <text x="245" y="40" fill="#fca5a5" font-size="10" font-weight="700">➔ Brain Met</text>
+
+                  <!-- Metastatic Site 2: Liver -->
+                  <ellipse cx="230" cy="165" rx="15" ry="10" fill="#dc2626" stroke="#fee2e2" stroke-width="2" filter="drop-shadow(0 0 8px #ef4444)" />
+                  <path d="M 180,130 Q 210,145 220,158" stroke="#ef4444" stroke-width="2" stroke-dasharray="3,2" />
+                  <text x="255" y="170" fill="#fca5a5" font-size="10" font-weight="700">➔ Liver Met</text>
+
+                  <!-- Metastatic Site 3: Bone / Spine -->
+                  <rect x="195" y="110" width="10" height="25" rx="2" fill="#dc2626" stroke="#fee2e2" stroke-width="1.5" />
+                  <rect x="195" y="145" width="10" height="25" rx="2" fill="#dc2626" stroke="#fee2e2" stroke-width="1.5" />
+                  <text x="250" y="125" fill="#fca5a5" font-size="10" font-weight="700">➔ Bone Met</text>
+
+                  <!-- Status Indicators -->
+                  <rect x="25" y="235" width="350" height="45" rx="6" fill="#0d233a" stroke="#1d4064" />
+                  <text x="50" y="255" fill="#ef4444" font-size="12" font-weight="700">✖ Distant Organ Metastasis (M1a / M1b / M1c)</text>
+                  <text x="50" y="271" fill="#94a3b8" font-size="11">● Disseminated to Brain, Bone, Liver, Adrenal, or Pleura</text>
+                </svg>
+              {% endif %}
+            </div>
+            <p class="illustration-caption">{{ s.illustration_title }}</p>
+          </div>
+
+          <!-- Right: Detailed Clinical Information -->
+          <div class="stage-details-content">
+            <!-- TNM Parameter Box -->
+            <div class="tnm-box">
+              <h4 class="tnm-title">AJCC TNM 8th Edition Classification:</h4>
+              <div class="tnm-grid">
+                <div class="tnm-item">
+                  <span class="tnm-tag">Primary Tumor (T)</span>
+                  <span class="tnm-val">{{ s.tnm.t }}</span>
+                </div>
+                <div class="tnm-item">
+                  <span class="tnm-tag">Lymph Nodes (N)</span>
+                  <span class="tnm-val">{{ s.tnm.n }}</span>
+                </div>
+                <div class="tnm-item">
+                  <span class="tnm-tag">Distant Metastasis (M)</span>
+                  <span class="tnm-val">{{ s.tnm.m }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pathological Characteristics -->
+            <div class="clinical-desc-box">
+              <h4>Anatomical & Morphological Characteristics:</h4>
+              <p>{{ s.description }}</p>
+              
+              <div class="char-metrics-row">
+                <div class="char-metric">
+                  <span class="char-label">Tumor Dimensions:</span>
+                  <span class="char-val">{{ s.tumor_size }}</span>
+                </div>
+                <div class="char-metric">
+                  <span class="char-label">Lymph Nodes:</span>
+                  <span class="char-val">{{ s.lymph_nodes }}</span>
+                </div>
+                <div class="char-metric">
+                  <span class="char-label">Metastatic Extent:</span>
+                  <span class="char-val">{{ s.metastasis }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Symptoms & Warning Signs -->
+            <div class="symptoms-box">
+              <h4>Typical Clinical Symptoms & Manifestations:</h4>
+              <ul class="symptoms-list">
+                {% for sym in s.symptoms %}
+                  <li><span class="bullet" style="color: {{ s.badge_color }};">▸</span> {{ sym }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <!-- Primary Treatment Modalities -->
+            <div class="treatment-box">
+              <h4>Mainstay Clinical Treatment Strategies:</h4>
+              <div class="treatment-tags">
+                {% for trt in s.treatments %}
+                  <span class="treatment-pill">{{ trt }}</span>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Key Takeaway -->
+            <div class="takeaway-callout" style="border-left-color: {{ s.badge_color }};">
+              <strong>Clinical Insight:</strong> {{ s.key_takeaway }}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- TNM Staging Comparison Matrix -->
+  <div class="glass-card" id="tnm-matrix" style="margin-top: 40px;">
+    <h2 class="card-title">Side-by-Side Lung Cancer Staging Comparison Matrix</h2>
+    <p class="card-subtitle">Comprehensive cross-comparison of Non-Small Cell Lung Cancer (NSCLC) stages based on anatomical spread, tumor size, and therapeutic goals.</p>
+
+    <div class="table-responsive" style="margin-top: 20px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>Clinical Definition</th>
+            <th>TNM Criteria</th>
+            <th>Lymph Node Spread</th>
+            <th>Distant Metastasis</th>
+            <th>Primary Oncology Goal</th>
+            <th>5-Yr Survival</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in stages %}
+            <tr>
+              <td>
+                <span class="stage-table-badge" style="background: {{ s.badge_color }}22; color: {{ s.badge_color }}; border-color: {{ s.badge_color }};">
+                  Stage {{ s.stage_roman }}
+                </span>
+              </td>
+              <td><strong>{{ s.subtitle }}</strong><br><small style="color: #94a3b8;">{{ s.one_liner }}</small></td>
+              <td><code class="code-pill">{{ s.tnm.t.split('(')[0] }} {{ s.tnm.n.split('(')[0] }} {{ s.tnm.m.split('(')[0] }}</code></td>
+              <td>{{ s.lymph_nodes }}</td>
+              <td>{{ s.metastasis }}</td>
+              <td>
+                {% if s.id in ['stage-0', 'stage-1'] %}
+                  <span class="goal-pill goal-curative">Curative Excision</span>
+                {% elif s.id == 'stage-2' %}
+                  <span class="goal-pill goal-multimodal">Curative Multimodal</span>
+                {% elif s.id == 'stage-3' %}
+                  <span class="goal-pill goal-locoregional">Locoregional Control</span>
+                {% else %}
+                  <span class="goal-pill goal-systemic">Systemic Precision & Palliative</span>
+                {% endif %}
+              </td>
+              <td><strong style="color: {{ s.badge_color }};">{{ s.prognosis_5yr }}</strong></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Educational Integration with CNN Model -->
+  <div class="glass-card" style="margin-top: 30px;">
+    <h2 class="card-title">Connecting AI Histopathology with Clinical Staging</h2>
+    <p class="card-subtitle">How deep learning classification directly connects with patient diagnostic pathways in healthcare systems.</p>
+
+    <div class="pathway-cards-grid">
+      <div class="pathway-step-card">
+        <div class="step-num">Step 1</div>
+        <h4>Microscopic Tissue Biopsy</h4>
+        <p>A core needle biopsy or bronchoalveolar lavage sample is obtained and stained with Hematoxylin and Eosin (H&E).</p>
+      </div>
+
+      <div class="pathway-step-card active-step">
+        <div class="step-num">Step 2 (LUNG-AI)</div>
+        <h4>CNN Subtype Classification</h4>
+        <p>Our deep learning models (Custom CNN, MobileNetV2, EfficientNetB0) evaluate cellular morphology and output subtype confidence (Adenocarcinoma vs Squamous vs Benign) with Grad-CAM heatmaps.</p>
+      </div>
+
+      <div class="pathway-step-card">
+        <div class="step-num">Step 3</div>
+        <h4>Radiographic Staging (TNM)</h4>
+        <p>Once cancer is identified under microscopy, whole-body 18F-FDG PET-CT and brain MRI establish the physical stage (0 to IV).</p>
+      </div>
+
+      <div class="pathway-step-card">
+        <div class="step-num">Step 4</div>
+        <h4>Personalized Tumor Board Plan</h4>
+        <p>Multidisciplinary oncology teams combine the histological subtype with the clinical stage to prescribe surgery, targeted therapy, or immunotherapy.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Medical Research Disclaimer -->
+  <div class="notice-box" style="margin-top: 30px;">
+    <strong>Academic Prototype & Clinical Disclaimer:</strong>
+    <p>
+      LUNG-AI is an educational and academic research prototype developed as an MCA project. The stages, survival estimates, and clinical pathways presented in this module 
+      reflect published AJCC and NCCN oncology guidelines for academic reference only. Deep learning predictions and informational staging cards must never replace professional 
+      clinical diagnosis, histological verification by board-certified pathologists, or staging consultations with licensed oncologists.
+    </p>
+  </div>
+</div>
+{% endblock %}

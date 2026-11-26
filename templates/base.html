@@ -19,6 +19,7 @@
 
       <div class="nav-links">
         <a href="{{ url_for('index') }}" class="nav-item">Diagnose Scan</a>
+        <a href="{{ url_for('stages') }}" class="nav-item">Stage Explorer</a>
         <a href="{{ url_for('dashboard') }}" class="nav-item">Model Comparison</a>
         <a href="{{ url_for('history') }}" class="nav-item">Prediction History</a>
         {% if session.get('user_role') == 'admin' %}

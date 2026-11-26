@@ -158,7 +158,17 @@ def generate_pdf_report(
         ('PADDING', (0,0), (-1,-1), 5),
     ]))
     story.append(t_probs)
-    story.append(Spacer(1, 20))
+    story.append(Spacer(1, 15))
+
+    # Clinical Staging Correlation Note
+    staging_note = (
+        "<b>Clinical Oncology Staging Context (Stage 0–IV):</b> Histopathological subtyping establishes the "
+        "cellular classification (NSCLC Adenocarcinoma, Squamous Cell, or Benign). Definitive clinical cancer staging "
+        "(Stage 0–IV) requires radiographic anatomical correlation (Contrast Chest CT, 18F-FDG PET-CT, Brain MRI) and TNM evaluation "
+        "by a certified oncology tumor board."
+    )
+    story.append(Paragraph(staging_note, styles['Normal']))
+    story.append(Spacer(1, 15))
 
     # Academic Disclaimer
     disclaimer_text = (

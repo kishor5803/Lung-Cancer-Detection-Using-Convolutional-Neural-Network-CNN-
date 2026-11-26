@@ -64,6 +64,27 @@
       </p>
     </div>
   </div>
+
+  <!-- Stage Explorer Callout Card -->
+  <div class="glass-card" style="margin-top: 25px; border-left: 4px solid var(--primary-gold);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <span class="stage-hero-badge" style="margin-bottom: 6px;">New Module</span>
+        <h3 style="color: var(--text-main); font-size: 1.25rem; font-weight: 800; margin-bottom: 6px;">
+          🫁 Lung Cancer Stages (0–IV) Explorer
+        </h3>
+        <p style="color: #94a3b8; font-size: 0.9rem; max-width: 750px; line-height: 1.6;">
+          Understand how our deep learning histopathological classifications (Adenocarcinoma, Squamous Cell, Benign) correlate with the clinical TNM staging pipeline (Stage 0 to IV) across tumor size, nodal spread, and distant metastasis.
+        </p>
+      </div>
+      <div>
+        <a href="{{ url_for('stages') }}" class="btn-primary" style="padding: 12px 22px; display: inline-flex; align-items: center; gap: 8px;">
+          <span>Explore Stages (0–IV)</span>
+          <span>➔</span>
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
