@@ -377,24 +377,26 @@ class LungCareDesktopApp(tk.Tk):
         def show_stage(st):
             self.stage_detail_text.configure(state=tk.NORMAL)
             self.stage_detail_text.delete("1.0", tk.END)
+            tnm_str = f"T: {st['tnm']['t']} | N: {st['tnm']['n']} | M: {st['tnm']['m']}" if isinstance(st.get('tnm'), dict) else str(st.get('tnm', ''))
             content = (
-                f"{st['stage_label']} — {st['short_title']}\n"
-                f"TNM Code: {st['tnm_code']}   |   5-Year Relative Survival: {st['survival_5yr']}\n"
+                f"{st.get('name', 'Stage')} — {st.get('subtitle', '')}\n"
+                f"TNM Criteria: {tnm_str}\n"
+                f"5-Year Survival Benchmark: {st.get('prognosis_5yr', 'Variable')}\n"
                 + "=" * 75 + "\n\n"
-                f"OVERVIEW:\n{st['clinical_description']}\n\n"
+                f"OVERVIEW:\n{st.get('description', '')}\n\n"
                 f"TUMOR & SPREAD CHARACTERISTICS:\n"
-                f"• Tumor Size / Extent: {st['tumor_size']}\n"
-                f"• Lymph Node Involvement: {st['lymph_nodes']}\n"
-                f"• Distant Metastasis: {st['metastasis']}\n\n"
-                f"COMMON SYMPTOMS:\n• " + "\n• ".join(st["symptoms"]) + "\n\n"
-                f"TYPICAL CLINICAL MANAGEMENT:\n• " + "\n• ".join(st["treatment_overview"])
+                f"• Tumor Size / Extent: {st.get('tumor_size', 'N/A')}\n"
+                f"• Lymph Node Involvement: {st.get('lymph_nodes', 'N/A')}\n"
+                f"• Distant Metastasis: {st.get('metastasis', 'N/A')}\n\n"
+                f"COMMON SYMPTOMS:\n• " + "\n• ".join(st.get("symptoms", [])) + "\n\n"
+                f"TYPICAL CLINICAL MANAGEMENT:\n• " + "\n• ".join(st.get("treatments", []))
             )
             self.stage_detail_text.insert(tk.END, content)
             self.stage_detail_text.configure(state=tk.DISABLED)
 
         for st in stages:
             b = tk.Button(
-                btn_bar, text=st["stage_label"], command=lambda s=st: show_stage(s),
+                btn_bar, text=st.get("name", "Stage"), command=lambda s=st: show_stage(s),
                 bg=BG_CARD, fg=ACCENT_CYAN, font=("Segoe UI", 10, "bold"),
                 relief=tk.FLAT, padx=16, pady=8, cursor="hand2"
             )
