@@ -57,6 +57,12 @@ class LungCareDesktopApp(tk.Tk):
         self._build_layout()
         self.show_frame("classify")
 
+        # Ensure window appears in foreground on Windows
+        self.deiconify()
+        self.lift()
+        self.attributes("-topmost", True)
+        self.after(350, lambda: self.attributes("-topmost", False))
+
     def _setup_styles(self):
         style = ttk.Style(self)
         style.theme_use("clam")
