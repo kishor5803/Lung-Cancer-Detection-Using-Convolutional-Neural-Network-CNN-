@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}Interactive 3D Lung Anatomy & Tumor Localization | LUNG-AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="hero-header" style="text-align: left; margin-bottom: 20px;">
+    <span class="badge-tag" style="background: rgba(16, 185, 129, 0.12); color: #34d399; border-color: rgba(16, 185, 129, 0.35);">Module 3 · WebGL Anatomical Visualization</span>
+    <h1 style="font-size: 2rem; margin-top: 8px;">Interactive 3D Lung &amp; Bronchial Anatomy</h1>
+    <p class="subtitle" style="max-width: 820px; margin: 6px 0 0;">
+      Explore left and right pulmonary lobes, tracheobronchial tree, and localized tumor regions in real-time 3D space. Drag to rotate, scroll to zoom, and right-drag to pan.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start;">
+    <!-- 3D WebGL Canvas Container -->
+    <div class="glass-card" style="padding: 0; overflow: hidden; position: relative; min-height: 580px; background: radial-gradient(circle at center, #0f1f38 0%, #060e1a 100%);">
+      <div id="lung3dCanvas" style="width: 100%; height: 580px; cursor: grab;"></div>
+
+      <!-- HUD Overlay -->
+      <div style="position: absolute; top: 14px; left: 16px; pointer-events: none;">
+        <div style="background: rgba(8, 20, 38, 0.78); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 8px;">
+          <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Active Focus</div>
+          <div id="hudFocusTitle" style="font-size: 0.95rem; font-weight: 700; color: var(--primary-gold);">Right Upper Lobe (Apical Nodule)</div>
+        </div>
+      </div>
+
+      <!-- Bottom Quick Controls -->
+      <div style="position: absolute; bottom: 14px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; pointer-events: none;">
+        <div style="background: rgba(8, 20, 38, 0.78); padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.08);">
+          🖱️ Left Drag: Rotate &nbsp;|&nbsp; Scroll: Zoom &nbsp;|&nbsp; Right Drag: Pan
+        </div>
+        <button type="button" onclick="resetCameraView()" style="pointer-events: auto; background: rgba(217, 185, 104, 0.18); border: 1px solid var(--primary-gold); color: var(--primary-gold); padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+          ↺ Reset Camera
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Controls & Anatomical Panel -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <!-- Tumor Localization Controls -->
+      <div class="glass-card" style="padding: 18px;">
+        <h3 style="font-size: 1rem; color: var(--primary-gold); margin: 0 0 12px;">🎯 Tumor Localization Region</h3>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;" id="siteButtons">
+          <button type="button" class="site-btn active" onclick="selectTumorSite('rul', this)">
+            <strong>Right Superior Lobe</strong>
+            <span>Peripheral Adenocarcinoma Site</span>
+          </button>
+          <button type="button" class="site-btn" onclick="selectTumorSite('rml', this)">
+            <strong>Right Middle Lobe</strong>
+            <span>Lateral Subpleural Nodule</span>
+          </button>
+          <button type="button" class="site-btn" onclick="selectTumorSite('rll', this)">
+            <strong>Right Inferior Lobe</strong>
+            <span>Posterior Basal Parenchyma</span>
+          </button>
+          <button type="button" class="site-btn" onclick="selectTumorSite('lul', this)">
+            <strong>Left Superior Lobe</strong>
+            <span>Apicoposterior / Lingular</span>
+          </button>
+          <button type="button" class="site-btn" onclick="selectTumorSite('lll', this)">
+            <strong>Left Inferior Lobe</strong>
+            <span>Inferior Basal Segment</span>
+          </button>
+          <button type="button" class="site-btn" onclick="selectTumorSite('hilar', this)">
+            <strong>Central Hilar / Bronchial</strong>
+            <span>Squamous / SCLC Typical Site</span>
+          </button>
+        </div>
+
+        <!-- Tumor Size Slider (T1a - T4) -->
+        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px;">
+            <span style="color: #94a3b8;">Tumor Diameter (T-Stage):</span>
+            <strong id="tumorSizeLabel" style="color: #ef4444;">2.5 cm (T1c)</strong>
+          </div>
+          <input type="range" id="tumorSizeSlider" min="0.8" max="7.5" step="0.2" value="2.5" style="width: 100%; accent-color: #ef4444;">
+        </div>
+      </div>
+
+      <!-- Visual Layer Controls -->
+      <div class="glass-card" style="padding: 18px;">
+        <h3 style="font-size: 1rem; color: #38bdf8; margin: 0 0 12px;">👁️ Parenchyma &amp; Airway Layers</h3>
+
+        <div style="margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+            <span style="color: #cbd5e1;">Lung Tissue Opacity</span>
+            <span id="opacityVal" style="color: #38bdf8;">38%</span>
+          </div>
+          <input type="range" id="lobeOpacitySlider" min="0.05" max="0.85" step="0.05" value="0.38" style="width: 100%; accent-color: #38bdf8;">
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="toggle-chip active" id="btnAutoRotate" onclick="toggleAutoRotate(this)">🔄 Auto-Rotate</button>
+          <button type="button" class="toggle-chip" id="btnWireframe" onclick="toggleWireframe(this)">🕸️ Wireframe</button>
+          <button type="button" class="toggle-chip active" id="btnBronchi" onclick="toggleBronchi(this)">🌳 Bronchial Tree</button>
+        </div>
+      </div>
+
+      <!-- Clinical Anatomy Info -->
+      <div class="glass-card" style="padding: 16px; background: rgba(15, 23, 42, 0.7);">
+        <h4 style="margin: 0 0 6px; font-size: 0.9rem; color: #f8fafc;">Anatomical &amp; Surgical Notes</h4>
+        <p id="anatomyInfoText" style="margin: 0; font-size: 0.8rem; color: #94a3b8; line-height: 1.55;">
+          The Right Lung comprises three lobes (Superior, Middle, Inferior) separated by the oblique and horizontal fissures. Peripheral Stage I-II lesions are commonly treated with VATS Lobectomy and mediastinal lymph node sampling.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .site-btn {
+    text-align: left;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid #334155;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .site-btn strong { font-size: 0.85rem; color: #e2e8f0; }
+  .site-btn span { font-size: 0.74rem; color: #94a3b8; margin-top: 2px; }
+  .site-btn:hover { border-color: var(--primary-gold); }
+  .site-btn.active {
+    background: rgba(217, 185, 104, 0.14);
+    border-color: var(--primary-gold);
+  }
+  .site-btn.active strong { color: var(--primary-gold); }
+
+  .toggle-chip {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    cursor: pointer;
+  }
+  .toggle-chip.active {
+    background: rgba(56, 189, 248, 0.16);
+    border-color: #38bdf8;
+    color: #38bdf8;
+  }
+
+  @media (max-width: 960px) {
+    .page-container > div:nth-child(2) {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+
+<!-- Three.js & OrbitControls from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+  const container = document.getElementById('lung3dCanvas');
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.1, 100);
+  camera.position.set(0, 1.2, 13.5);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.9;
+  controls.minDistance = 5;
+  controls.maxDistance = 24;
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+  scene.add(ambientLight);
+
+  const dirLight1 = new THREE.DirectionalLight(0xfff5e6, 0.95);
+  dirLight1.position.set(6, 10, 8);
+  scene.add(dirLight1);
+
+  const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 0.55);
+  dirLight2.position.set(-8, -4, -6);
+  scene.add(dirLight2);
+
+  const lungGroup = new THREE.Group();
+  scene.add(lungGroup);
+
+  // Materials
+  const lobeMaterials = [];
+  function createLobeMaterial(colorHex) {
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: colorHex,
+      transparent: true,
+      opacity: 0.38,
+      roughness: 0.35,
+      metalness: 0.05,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    lobeMaterials.push(mat);
+    return mat;
+  }
+
+  const airwayMaterial = new THREE.MeshStandardMaterial({
+    color: 0xe2e8f0,
+    roughness: 0.45,
+    metalness: 0.1
+  });
+
+  const cartilageRingMat = new THREE.MeshStandardMaterial({
+    color: 0x94a3b8,
+    roughness: 0.4
+  });
+
+  // Trachea & Bronchial Tree Group
+  const airwayGroup = new THREE.Group();
+  lungGroup.add(airwayGroup);
+
+  // Trachea
+  const tracheaGeo = new THREE.CylinderGeometry(0.32, 0.34, 3.2, 24);
+  const trachea = new THREE.Mesh(tracheaGeo, airwayMaterial);
+  trachea.position.set(0, 3.1, 0);
+  airwayGroup.add(trachea);
+
+  // Tracheal Cartilage Rings
+  for (let i = 0; i < 10; i++) {
+    const ringGeo = new THREE.TorusGeometry(0.34, 0.035, 10, 24);
+    const ring = new THREE.Mesh(ringGeo, cartilageRingMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(0, 1.7 + i * 0.28, 0);
+    airwayGroup.add(ring);
+  }
+
+  function createBronchusBranch(startVec, endVec, rStart, rEnd) {
+    const path = new THREE.LineCurve3(startVec, endVec);
+    const len = startVec.distanceTo(endVec);
+    const geo = new THREE.CylinderGeometry(rEnd, rStart, len, 16);
+    const mesh = new THREE.Mesh(geo, airwayMaterial);
+    mesh.position.copy(startVec).add(endVec).multiplyScalar(0.5);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), endVec.clone().sub(startVec).normalize());
+    airwayGroup.add(mesh);
+  }
+
+  // Carina (0, 1.5, 0) -> Right & Left Primary Bronchi
+  const carina = new THREE.Vector3(0, 1.55, 0);
+  const rMain = new THREE.Vector3(-1.35, 0.85, 0);   // Right lung (patient's right = viewer's left -X)
+  const lMain = new THREE.Vector3(1.55, 0.65, 0);    // Left lung (patient's left = viewer's right +X)
+  createBronchusBranch(carina, rMain, 0.28, 0.22);
+  createBronchusBranch(carina, lMain, 0.28, 0.20);
+
+  // Secondary Bronchi (Right: Upper, Middle, Lower)
+  createBronchusBranch(rMain, new THREE.Vector3(-2.4, 2.0, -0.1), 0.20, 0.12);
+  createBronchusBranch(rMain, new THREE.Vector3(-2.3, 0.1, 0.45), 0.18, 0.11);
+  createBronchusBranch(rMain, new THREE.Vector3(-2.5, -1.4, -0.35), 0.20, 0.11);
+
+  // Secondary Bronchi (Left: Upper, Lower)
+  createBronchusBranch(lMain, new THREE.Vector3(2.6, 1.9, 0.05), 0.19, 0.12);
+  createBronchusBranch(lMain, new THREE.Vector3(2.6, -1.3, -0.3), 0.19, 0.11);
+
+  // Organic Lobe Builder (Sculpted Ellipsoid)
+  function createLobeMesh(rx, ry, rz, px, py, pz, rotZ, colorHex) {
+    const geo = new THREE.SphereGeometry(1, 36, 28);
+    geo.scale(rx, ry, rz);
+    const mat = createLobeMaterial(colorHex);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(px, py, pz);
+    mesh.rotation.z = rotZ;
+    lungGroup.add(mesh);
+    return mesh;
+  }
+
+  // Right Lung (Viewer's Left, x < 0) - 3 Lobes
+  const lobeRUL = createLobeMesh(1.45, 1.65, 1.35, -2.1, 1.75, -0.05, -0.18, 0x38bdf8);
+  const lobeRML = createLobeMesh(1.35, 0.95, 1.30, -2.15, -0.05, 0.45, -0.08, 0x2dd4bf);
+  const lobeRLL = createLobeMesh(1.55, 1.55, 1.45, -2.35, -1.55, -0.35, 0.10, 0x0ea5e9);
+
+  // Left Lung (Viewer's Right, x > 0) - 2 Lobes (slightly narrower for cardiac notch)
+  const lobeLUL = createLobeMesh(1.40, 1.75, 1.35, 2.25, 1.55, 0.05, 0.18, 0x818cf8);
+  const lobeLLL = createLobeMesh(1.50, 1.55, 1.42, 2.40, -1.45, -0.30, -0.10, 0x6366f1);
+
+  // Tumor Nodule + Glow Halo
+  const tumorGroup = new THREE.Group();
+  lungGroup.add(tumorGroup);
+
+  const tumorGeo = new THREE.SphereGeometry(0.45, 32, 32);
+  const tumorMat = new THREE.MeshStandardMaterial({
+    color: 0xef4444,
+    emissive: 0xdc2626,
+    emissiveIntensity: 0.75,
+    roughness: 0.25
+  });
+  const tumorMesh = new THREE.Mesh(tumorGeo, tumorMat);
+  tumorGroup.add(tumorMesh);
+
+  const haloGeo = new THREE.SphereGeometry(0.68, 24, 24);
+  const haloMat = new THREE.MeshBasicMaterial({
+    color: 0xf87171,
+    transparent: true,
+    opacity: 0.25
+  });
+  const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+  tumorGroup.add(haloMesh);
+
+  const siteConfigs = {
+    rul: {
+      pos: [-2.35, 2.15, 0.25],
+      title: "Right Superior Lobe (Apical Nodule)",
+      info: "Most frequent site for primary Lung Adenocarcinoma. Peripheral subpleural nodules here may cause pleural puckering and are staged carefully for chest wall or apical sulcus (Pancoast) proximity."
+    },
+    rml: {
+      pos: [-2.25, -0.1, 0.85],
+      title: "Right Middle Lobe (Lateral Segment)",
+      info: "The Right Middle Lobe is the smallest of the three right lobes, bordered by the horizontal and oblique fissures. Middle lobe lesions can compress the middle lobe bronchus causing Middle Lobe Syndrome."
+    },
+    rll: {
+      pos: [-2.55, -1.75, -0.45],
+      title: "Right Inferior Lobe (Posterior Basal)",
+      info: "Basal lung segments move extensively with diaphragmatic respiration. Stereotactic Body Radiotherapy (SBRT) or CT-guided biopsy requires respiratory gating here."
+    },
+    lul: {
+      pos: [2.45, 1.75, 0.30],
+      title: "Left Superior Lobe (Apicoposterior)",
+      info: "The Left Superior Lobe includes the Lingula (anatomic counterpart to the right middle lobe) and forms the cardiac notch around the left ventricle."
+    },
+    lll: {
+      pos: [2.55, -1.65, -0.35],
+      title: "Left Inferior Lobe (Basilar Segment)",
+      info: "Lymphatic drainage from the left lower lobe routinely tracks to the subcarinal (Station 7) and left hilar (Station 10L) lymph nodes."
+    },
+    hilar: {
+      pos: [-1.15, 0.90, 0.10],
+      title: "Central Hilar / Mainstem Bronchus",
+      info: "Classic anatomic presentation of Squamous Cell Carcinoma and Small Cell Lung Cancer. Central tumors frequently manifest early with hemoptysis, bronchial stenosis, and post-obstructive atelectasis."
+    }
+  };
+
+  function selectTumorSite(siteKey, btn) {
+    const cfg = siteConfigs[siteKey];
+    if (!cfg) return;
+    tumorGroup.position.set(cfg.pos[0], cfg.pos[1], cfg.pos[2]);
+    document.getElementById('hudFocusTitle').textContent = cfg.title;
+    document.getElementById('anatomyInfoText').textContent = cfg.info;
+
+    document.querySelectorAll('.site-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  // Initialize default site
+  selectTumorSite('rul', document.querySelector('.site-btn.active'));
+
+  // Tumor Size Slider
+  const sizeSlider = document.getElementById('tumorSizeSlider');
+  const sizeLabel = document.getElementById('tumorSizeLabel');
+  sizeSlider.addEventListener('input', function() {
+    const cm = parseFloat(this.value);
+    const scaleFactor = 0.4 + (cm / 7.5) * 1.4;
+    tumorGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+    let tCat = "T1a";
+    if (cm > 7.0) tCat = "T4";
+    else if (cm > 5.0) tCat = "T3";
+    else if (cm > 4.0) tCat = "T2b";
+    else if (cm > 3.0) tCat = "T2a";
+    else if (cm > 2.0) tCat = "T1c";
+    else if (cm > 1.0) tCat = "T1b";
+
+    sizeLabel.textContent = cm.toFixed(1) + " cm (" + tCat + ")";
+  });
+
+  // Lobe Opacity Slider
+  const opSlider = document.getElementById('lobeOpacitySlider');
+  const opVal = document.getElementById('opacityVal');
+  opSlider.addEventListener('input', function() {
+    const v = parseFloat(this.value);
+    opVal.textContent = Math.round(v * 100) + "%";
+    lobeMaterials.forEach(m => m.opacity = v);
+  });
+
+  function toggleAutoRotate(btn) {
+    controls.autoRotate = !controls.autoRotate;
+    btn.classList.toggle('active', controls.autoRotate);
+  }
+
+  function toggleWireframe(btn) {
+    const nextState = !lobeMaterials[0].wireframe;
+    lobeMaterials.forEach(m => m.wireframe = nextState);
+    btn.classList.toggle('active', nextState);
+  }
+
+  function toggleBronchi(btn) {
+    airwayGroup.visible = !airwayGroup.visible;
+    btn.classList.toggle('active', airwayGroup.visible);
+  }
+
+  function resetCameraView() {
+    camera.position.set(0, 1.2, 13.5);
+    controls.target.set(0, 0, 0);
+    controls.update();
+  }
+
+  // Animation Loop with gentle tumor pulse
+  let clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const elapsed = clock.getElapsedTime();
+    const pulse = 1.0 + Math.sin(elapsed * 3.5) * 0.12;
+    haloMesh.scale.set(pulse, pulse, pulse);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // Responsive Resize
+  window.addEventListener('resize', () => {
+    if (!container) return;
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+</script>
+{% endblock %}
+

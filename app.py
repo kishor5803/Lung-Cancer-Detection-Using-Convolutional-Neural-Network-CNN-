@@ -3,7 +3,7 @@ import uuid
 from pathlib import Path
 from flask import (
     Flask, render_template, request,
-    redirect, url_for, flash, session, send_from_directory
+    redirect, url_for, flash, session, send_from_directory, jsonify
 )
 from werkzeug.utils import secure_filename
 
@@ -16,6 +16,10 @@ from services.history_service import (
 )
 from services.report_service import generate_pdf_report
 from services.stages_service import get_all_stages, get_stage_by_id
+from services.measurement_service import (
+    estimate_tumor_dimensions, DEFAULT_MICRONS_PER_PIXEL, DEFAULT_MM_PER_PIXEL_CT
+)
+from services.cancer_types_service import get_all_cancer_types, get_imaging_modalities
 from prediction.predict import predict_single_image
 from training.compare_models import generate_benchmark_metrics
 
@@ -88,6 +92,17 @@ def classify():
         else None
     )
 
+    # Tumor size & morphometric segmentation
+    measurement_data = None
+    try:
+        measurement_data = estimate_tumor_dimensions(
+            save_path,
+            heatmap_path=heatmap_full_path,
+            pixel_scale_mm=0.0005  # Default 20x H&E optical scale (0.5 um/px)
+        )
+    except Exception as e:
+        print(f"Measurement note: {e}")
+
     pdf_rel_path = ""
     try:
         pdf_rel_path = generate_pdf_report(
@@ -116,7 +131,8 @@ def classify():
         "result.html",
         prediction=prediction_result,
         original_filename=unique_name,
-        pdf_url=pdf_rel_path
+        pdf_url=pdf_rel_path,
+        measurement=measurement_data
     )
 
 
@@ -149,6 +165,101 @@ def stage_detail(stage_id):
         flash(f"Stage '{stage_id}' not found.", "warning")
         return redirect(url_for("stages"))
     return render_template("stages.html", stages=get_all_stages(), active_stage=stage_id)
+
+
+@app.route("/measure", methods=["GET", "POST"])
+def measure():
+    """Tumor Size Estimation & Saliency Segmentation Studio."""
+    measurement_result = None
+    filename = request.args.get("image", "")
+    pixel_scale_mm = float(request.form.get("pixel_scale_mm", request.args.get("scale", 0.7)))
+
+    if request.method == "POST":
+        if "file" in request.files and request.files["file"].filename != "":
+            file = request.files["file"]
+            if not allowed_file(file.filename):
+                flash(f"Invalid file format. Allowed: {', '.join(Config.ALLOWED_EXTENSIONS)}", "danger")
+                return redirect(url_for("measure"))
+            unique_name = f"meas_{uuid.uuid4().hex[:8]}_{secure_filename(file.filename)}"
+            save_path = Config.UPLOAD_FOLDER / unique_name
+            file.save(save_path)
+            filename = unique_name
+        else:
+            filename = request.form.get("existing_image", "")
+
+        if filename:
+            img_path = Config.UPLOAD_FOLDER / filename
+            if img_path.exists():
+                try:
+                    measurement_result = estimate_tumor_dimensions(
+                        img_path,
+                        pixel_scale_mm=pixel_scale_mm,
+                        output_filename=f"seg_{uuid.uuid4().hex[:6]}_{Path(filename).stem}.jpg"
+                    )
+                except Exception as e:
+                    flash(f"Segmentation error: {str(e)}", "danger")
+            else:
+                flash("Target image file not found on server.", "warning")
+    elif filename:
+        img_path = Config.UPLOAD_FOLDER / filename
+        if img_path.exists():
+            try:
+                measurement_result = estimate_tumor_dimensions(
+                    img_path,
+                    pixel_scale_mm=pixel_scale_mm
+                )
+            except Exception as e:
+                print(f"Auto-measure notice: {e}")
+
+    return render_template(
+        "measure.html",
+        measurement=measurement_result,
+        filename=filename,
+        pixel_scale_mm=pixel_scale_mm
+    )
+
+
+@app.route("/api/measure", methods=["POST"])
+def api_measure():
+    """AJAX endpoint for real-time calibration scale recalculation."""
+    data = request.get_json(silent=True) or {}
+    filename = data.get("filename", "")
+    pixel_scale_mm = float(data.get("pixel_scale_mm", 0.7))
+
+    if not filename:
+        return jsonify({"error": "No filename specified"}), 400
+
+    img_path = Config.UPLOAD_FOLDER / filename
+    if not img_path.exists():
+        return jsonify({"error": "Image not found"}), 404
+
+    try:
+        res = estimate_tumor_dimensions(
+            img_path,
+            pixel_scale_mm=pixel_scale_mm,
+            output_filename=f"seg_{Path(filename).stem}.jpg"
+        )
+        return jsonify(res)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/lung3d")
+def lung3d():
+    """Interactive 3D Lung Anatomy & Tumor Localization Visualizer."""
+    return render_template("lung3d.html")
+
+
+@app.route("/types")
+def cancer_types():
+    """Lung Cancer Type Classification & Imaging Modality Knowledge Center."""
+    types_data = get_all_cancer_types()
+    modalities_data = get_imaging_modalities()
+    return render_template(
+        "cancer_types.html",
+        cancer_types=types_data,
+        modalities=modalities_data
+    )
 
 
 @app.route("/history")

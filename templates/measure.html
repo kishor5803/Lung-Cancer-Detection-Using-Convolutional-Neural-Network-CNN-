@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Tumor Size Estimation & Segmentation Studio | LUNG-AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="hero-header" style="text-align: left; margin-bottom: 24px;">
+    <span class="badge-tag" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border-color: rgba(56, 189, 248, 0.35);">Module 2 · Morphometry &amp; Segmentation</span>
+    <h1 style="font-size: 2rem; margin-top: 8px;">Tumor Size Estimation &amp; Region Segmentation</h1>
+    <p class="subtitle" style="max-width: 780px; margin: 6px 0 0;">
+      Morphological contour extraction, rotated bounding box dimensions, Feret diameter ($D_{\max}$), and calibrated surface area calculation.
+    </p>
+  </div>
+
+  <!-- Upload & Calibration Control Panel -->
+  <div class="glass-card" style="margin-bottom: 24px;">
+    <form action="{{ url_for('measure') }}" method="POST" enctype="multipart/form-data" id="measureForm">
+      <input type="hidden" name="existing_image" id="existingImageInput" value="{{ filename }}">
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; align-items: start;">
+        <!-- Image Upload Box -->
+        <div>
+          <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--primary-gold);">1. Select CT Slice or Histopathology Tile</h3>
+          <label for="measureFileInput" class="upload-area" style="padding: 24px; min-height: 140px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer;">
+            <div style="font-size: 2rem; margin-bottom: 6px;">📐</div>
+            <div style="font-weight: 600; color: #e2e8f0;" id="measureFileName">
+              {% if filename %}Active Scan: {{ filename }}{% else %}Click or drop medical scan (PNG / JPG){% endif %}
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Supports CT slices, nodules, or H&amp;E biopsy patches</div>
+            <input type="file" name="file" id="measureFileInput" accept=".png,.jpg,.jpeg" style="display: none;">
+          </label>
+        </div>
+
+        <!-- Calibration Presets & Slider -->
+        <div>
+          <h3 style="font-size: 1rem; margin-bottom: 10px; color: #38bdf8;">2. Spatial Calibration Scale (mm / pixel)</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+            <button type="button" class="btn-preset" onclick="setScalePreset(0.70, this)">LDCT Scan (0.70 mm/px)</button>
+            <button type="button" class="btn-preset" onclick="setScalePreset(0.50, this)">Contrast CT (0.50 mm/px)</button>
+            <button type="button" class="btn-preset" onclick="setScalePreset(0.0005, this)">H&amp;E 20x (0.5 µm/px)</button>
+            <button type="button" class="btn-preset" onclick="setScalePreset(0.00025, this)">H&amp;E 40x (0.25 µm/px)</button>
+          </div>
+
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 8px;">
+              <span style="color: #94a3b8;">Active Spatial Resolution:</span>
+              <strong style="color: var(--primary-gold); font-family: 'JetBrains Mono', monospace;" id="scaleDisplay">{{ pixel_scale_mm }} mm/px</strong>
+            </div>
+            <input type="number" name="pixel_scale_mm" id="scaleInput" step="0.00005" min="0.0001" max="5.0"
+                   value="{{ pixel_scale_mm }}"
+                   style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 8px 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
+          </div>
+
+          <div style="margin-top: 14px; display: flex; gap: 10px;">
+            <button type="submit" class="btn-primary" style="flex: 1;">
+              🔍 Segment &amp; Measure Tumor
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results Dashboard -->
+  {% if measurement %}
+  <div id="resultsDashboard">
+    <!-- Top KPI Row -->
+    <div class="metrics-row" style="margin-bottom: 24px;">
+      <div class="metric-box">
+        <span class="metric-label">Max Feret Diameter (D_max)</span>
+        <span class="metric-val text-gold" id="valMaxDiam">{{ measurement.max_diameter_mm }} mm</span>
+      </div>
+      <div class="metric-box">
+        <span class="metric-label">Lesion Surface Area</span>
+        <span class="metric-val" style="color: #38bdf8;" id="valArea">{{ measurement.area_mm2 }} mm²</span>
+      </div>
+      <div class="metric-box">
+        <span class="metric-label">Equivalent Diameter</span>
+        <span class="metric-val" id="valEquivDiam">{{ measurement.equivalent_diameter_mm }} mm</span>
+      </div>
+      <div class="metric-box">
+        <span class="metric-label">Perimeter</span>
+        <span class="metric-val" id="valPerimeter">{{ measurement.perimeter_mm }} mm</span>
+      </div>
+    </div>
+
+    <!-- Visual Segmentation & Detailed Morphometrics -->
+    <div class="glass-card" style="margin-bottom: 24px;">
+      <div class="images-comparison-grid" style="align-items: start;">
+        <div class="image-card">
+          <h4>Original Input Scan</h4>
+          <div class="img-wrapper">
+            <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="Original Scan">
+          </div>
+          <p class="image-caption">Unprocessed Input Image ({{ filename }})</p>
+        </div>
+
+        <div class="image-card">
+          <h4>Tumor Segmentation &amp; Axis Overlay</h4>
+          <div class="img-wrapper">
+            {% if measurement.segmentation_image_url %}
+              <img src="{{ url_for('static', filename=measurement.segmentation_image_url) }}?t={{ range(1, 99999) | random }}"
+                   id="segPreviewImg" alt="Segmentation Overlay">
+            {% endif %}
+          </div>
+          <p class="image-caption">Gold: Segmented Boundary | Cyan: Bounding Box | Red: D_max Axis</p>
+        </div>
+      </div>
+
+      <!-- Morphometric Breakdown -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 22px;">
+        <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: #94a3b8; text-transform: uppercase;">Minor Axis Diameter</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: #f8fafc; margin-top: 4px;" id="valMinorDiam">{{ measurement.minor_diameter_mm }} mm</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: #94a3b8; text-transform: uppercase;">Compactness / Circularity</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: #f8fafc; margin-top: 4px;" id="valCompactness">{{ measurement.compactness_index }} (0–1.0)</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: #94a3b8; text-transform: uppercase;">Morphological Margin Profile</div>
+          <div style="font-size: 0.95rem; font-weight: 600; color: #d9b968; margin-top: 4px;" id="valMargin">{{ measurement.margin_profile }}</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
+          <div style="font-size: 0.78rem; color: #94a3b8; text-transform: uppercase;">AJCC T-Stage Size Bracket</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: #f59e0b; margin-top: 4px;" id="valTStage">{{ measurement.tnm_t_estimate }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Technical Requirement Disclaimer -->
+  <div class="glass-card" style="border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.06);">
+    <h4 style="margin: 0 0 6px; color: #f59e0b; font-size: 0.95rem;">⚠️ Technical Calibration Requirement</h4>
+    <p style="margin: 0; color: #cbd5e1; font-size: 0.85rem; line-height: 1.6;">
+      Reliable clinical tumor size measurement requires calibrated medical imaging — typically volumetric CT/DICOM data with embedded voxel spacing metadata (PixelSpacing / SliceThickness) and a dedicated 3D segmentation network (e.g., U-Net / nnU-Net). A standard 2D CNN classification model alone cannot measure physical tumor size without explicit spatial calibration.
+    </p>
+  </div>
+</div>
+
+<style>
+  .btn-preset {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-preset:hover, .btn-preset.active {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: #38bdf8;
+    color: #38bdf8;
+  }
+</style>
+
+<script>
+  const fileInput = document.getElementById('measureFileInput');
+  const fileNameLabel = document.getElementById('measureFileName');
+  const scaleInput = document.getElementById('scaleInput');
+  const scaleDisplay = document.getElementById('scaleDisplay');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        fileNameLabel.textContent = "Selected: " + this.files[0].name;
+      }
+    });
+  }
+
+  function setScalePreset(val, btn) {
+    scaleInput.value = val;
+    scaleDisplay.textContent = val + " mm/px";
+    document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    liveRecalculate(val);
+  }
+
+  if (scaleInput) {
+    scaleInput.addEventListener('input', function() {
+      scaleDisplay.textContent = this.value + " mm/px";
+    });
+    scaleInput.addEventListener('change', function() {
+      liveRecalculate(this.value);
+    });
+  }
+
+  async function liveRecalculate(scaleVal) {
+    const existingImg = document.getElementById('existingImageInput').value;
+    if (!existingImg) return;
+
+    try {
+      const resp = await fetch("{{ url_for('api_measure') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: existingImg,
+          pixel_scale_mm: parseFloat(scaleVal)
+        })
+      });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (document.getElementById('valMaxDiam')) {
+        document.getElementById('valMaxDiam').textContent = data.max_diameter_mm + " mm";
+        document.getElementById('valArea').textContent = data.area_mm2 + " mm²";
+        document.getElementById('valEquivDiam').textContent = data.equivalent_diameter_mm + " mm";
+        document.getElementById('valPerimeter').textContent = data.perimeter_mm + " mm";
+        document.getElementById('valMinorDiam').textContent = data.minor_diameter_mm + " mm";
+        document.getElementById('valCompactness').textContent = data.compactness_index + " (0–1.0)";
+        document.getElementById('valMargin').textContent = data.margin_profile;
+        document.getElementById('valTStage').textContent = data.tnm_t_estimate;
+        const imgEl = document.getElementById('segPreviewImg');
+        if (imgEl && data.segmentation_image_url) {
+          imgEl.src = "/static/" + data.segmentation_image_url + "?t=" + Date.now();
+        }
+      }
+    } catch (e) {
+      console.error("Live recalc note:", e);
+    }
+  }
+</script>
+{% endblock %}
+

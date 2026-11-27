@@ -93,6 +93,36 @@
       </div>
     </div>
   </div>
+
+  <!-- Advanced Modules Showcase Grid -->
+  <div style="margin-top: 28px;">
+    <h2 style="font-size: 1.25rem; color: #f8fafc; margin-bottom: 14px;">LUNGCARE AI — Integrated Diagnostic Modules</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px;">
+      <a href="{{ url_for('measure') }}" class="glass-card" style="text-decoration: none; transition: transform 0.2s; border-top: 3px solid #38bdf8;">
+        <div style="font-size: 1.6rem; margin-bottom: 8px;">📐</div>
+        <h3 style="font-size: 1rem; color: #38bdf8; margin: 0 0 6px;">Tumor Size Estimation</h3>
+        <p style="font-size: 0.82rem; color: #94a3b8; margin: 0; line-height: 1.45;">Automated contour segmentation, Feret diameter (D_max), surface area, and spatial scale calibration.</p>
+      </a>
+
+      <a href="{{ url_for('lung3d') }}" class="glass-card" style="text-decoration: none; transition: transform 0.2s; border-top: 3px solid #10b981;">
+        <div style="font-size: 1.6rem; margin-bottom: 8px;">🫁</div>
+        <h3 style="font-size: 1rem; color: #34d399; margin: 0 0 6px;">Interactive 3D Lung</h3>
+        <p style="font-size: 0.82rem; color: #94a3b8; margin: 0; line-height: 1.45;">WebGL 3D pulmonary lobes, bronchial tree, and interactive tumor localization with T-stage scaling.</p>
+      </a>
+
+      <a href="{{ url_for('stages') }}" class="glass-card" style="text-decoration: none; transition: transform 0.2s; border-top: 3px solid #d9b968;">
+        <div style="font-size: 1.6rem; margin-bottom: 8px;">📊</div>
+        <h3 style="font-size: 1rem; color: var(--primary-gold); margin: 0 0 6px;">Cancer Stages (0–IV)</h3>
+        <p style="font-size: 0.82rem; color: #94a3b8; margin: 0; line-height: 1.45;">AJCC TNM 8th Edition staging explorer with medical illustrations, symptoms, and survival benchmarks.</p>
+      </a>
+
+      <a href="{{ url_for('cancer_types') }}" class="glass-card" style="text-decoration: none; transition: transform 0.2s; border-top: 3px solid #a855f7;">
+        <div style="font-size: 1.6rem; margin-bottom: 8px;">🧬</div>
+        <h3 style="font-size: 1rem; color: #c084fc; margin: 0 0 6px;">Types &amp; Modalities</h3>
+        <p style="font-size: 0.82rem; color: #94a3b8; margin: 0; line-height: 1.45;">NSCLC &amp; SCLC molecular profiles, biomarkers, and Histopathology vs CT vs Chest X-Ray guide.</p>
+      </a>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
